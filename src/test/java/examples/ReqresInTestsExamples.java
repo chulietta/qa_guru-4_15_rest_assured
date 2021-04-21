@@ -1,4 +1,4 @@
-package tests;
+package examples;
 
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
@@ -8,9 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static utils.FileUtils.readStringFromFile;
 
-public class ReqresInTests {
+
+public class ReqresInTestsExamples {
 
     @BeforeAll
     static void setup() {
@@ -19,40 +21,37 @@ public class ReqresInTests {
     }
 
     @Test
-    void successfulCreateUserTest() {
-        String data = readStringFromFile("./src/test/resources/create_user_data.txt");
+    void successUsersListTest() {
         given()
-                .contentType(ContentType.JSON)
-                .body(data)
                 .when()
-                .post("/api/users")
-                .then()
-                .statusCode(201)
-                .log().body()
-                .body("name", is("morpheus"));
-    }
-
-    @Test
-    void successfulRegisterUserTest() {
-        String data = readStringFromFile("./src/test/resources/register_user_data.txt");
-        given()
-                .contentType(ContentType.JSON)
-                .body(data)
-                .when()
-                .post("/api/register")
+                .get("/api/users?page=2")
                 .then()
                 .statusCode(200)
                 .log().body()
-                .body("token", is("QpwL5tke4Pnpja7X4"));
+                .body("support.text",
+                        is("To keep ReqRes free, contributions towards server costs are appreciated!"));
     }
 
     @Test
-    void unSuccessfulRegisterUserTest() {
+    void successfulLoginTest() {
         given()
                 .contentType(ContentType.JSON)
-                .body("{ \"email\": \"sydney@fife\" }")
+                .body("{ \"email\": \"eve.holt@reqres.in\", \"password\": \"cityslicka\" }")
                 .when()
-                .post("/api/register")
+                .post("/api/login")
+                .then()
+                .statusCode(200)
+                .log().body()
+                .body("token", is(notNullValue()));
+    }
+
+    @Test
+    void unSuccessfulLoginTest() {
+        given()
+                .contentType(ContentType.JSON)
+                .body("{ \"email\": \"peter@klaven\" }")
+                .when()
+                .post("/api/login")
                 .then()
                 .statusCode(400)
                 .log().body()
@@ -60,25 +59,16 @@ public class ReqresInTests {
     }
 
     @Test
-    void successfulUpdateUserTest() {
-        String data = readStringFromFile("./src/test/resources/update_user_data.txt");
+    void successfulLoginWithDataInFileTest() {
+        String data = readStringFromFile("./src/test/resources/login_data.txt");
         given()
                 .contentType(ContentType.JSON)
                 .body(data)
                 .when()
-                .put("api/users/2")
+                .post("/api/login")
                 .then()
                 .statusCode(200)
                 .log().body()
-                .body("job", is("zion resident"));
-    }
-
-    @Test
-    void successfulDeleteUserTest() {
-        given()
-                .when()
-                .delete("api/users/2")
-                .then()
-                .statusCode(204);
+                .body("token", is(notNullValue()));
     }
 }
