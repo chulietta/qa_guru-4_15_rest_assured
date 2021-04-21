@@ -38,7 +38,7 @@ public class SelenoidTests {
     @Test
     void successStatusWithBasicAuthTest() {
         given()
-                .auth().basic("user1","1234")
+                .auth().basic("user1", "1234")
                 .when()
                 .get("https://selenoid.autotests.cloud:4444/wd/hub/status")
                 .then()
@@ -70,7 +70,6 @@ public class SelenoidTests {
                 .log().body()
                 .statusCode(200)
                 .extract().response();
-
     }
 
     @Test
